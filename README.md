@@ -29,19 +29,19 @@ The outputs of these methods are also saved as class attributes within each inst
 
 At present, the following technical analysis indicators are made available by tatspy:
 
-1.'simple_moving_average' : simple moving average of stock price
-2.'exponential_moving_average': exponential moving average of stock price
-3.'RSI': Relative Strength Index
-4.'bollinger_bands': Bollinger Bands
-5.'bollinger_bands_indicator': Indicates if stock price close to bands, suggesting price reversal
-6.'MACD' : Moving Average Convergence-Divergence
-7.'stochastic': Stochastic Oscillator
-8.'VWAP': Volume Weighted Average Price
-9.'ATR': Average True Range
-10.'ADX': Average Directional Index
-11.'parabolic_SAR': Parabolic SAR
-12.'parabolic_SAR_indicator: Indicates if parabolic SAR suggests a price reversal upwards (+1) or downwards (-1)
-13.'TRIX': Triple Exponential Average
+1. 'simple_moving_average' : simple moving average of stock price  
+2. 'exponential_moving_average': exponential moving average of stock price  
+3. 'RSI': Relative Strength Index  
+4. 'bollinger_bands': Bollinger Bands  
+5. 'bollinger_bands_indicator': Indicates if stock price close to bands, suggesting price reversal
+6. 'MACD' : Moving Average Convergence-Divergence
+7. 'stochastic': Stochastic Oscillator
+8. 'VWAP': Volume Weighted Average Price
+9. 'ATR': Average True Range
+10. 'ADX': Average Directional Index
+11. 'parabolic_SAR': Parabolic SAR
+12. 'parabolic_SAR_indicator: Indicates if parabolic SAR suggests a price reversal upwards (+1) or downwards (-1)
+13. 'TRIX': Triple Exponential Average
 
 ## Citations
 
