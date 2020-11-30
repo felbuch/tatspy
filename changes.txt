@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 30 08:06:27 2020
+
+@author: Felipe
+"""
+
+v.0.0.2
+Update package requirements
+Update README.md
