@@ -20,6 +20,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     keywords = ['STOCK', 'TECHNICAL ANALYSIS INDICATORS', 'HISTORICAL DATA' ,'TIME SERIES', 'MACHINE LEARNING', 'ALGORITHMIC TRADING'],   
     url="https://github.com/felbuch/tatspy",
+    download_utl='https://github.com/felbuch/tatspy/archive/v0.0.1.tar.gz',
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
