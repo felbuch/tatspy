@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     keywords = ['STOCK', 'TECHNICAL ANALYSIS INDICATORS', 'HISTORICAL DATA' ,'TIME SERIES', 'MACHINE LEARNING', 'ALGORITHMIC TRADING'],   
-    download_url='https://github.com/felbuch/tatspy/archive/v0.0.1.tar.gz',
+    download_url='https://github.com/felbuch/tatspy/archive/v0.0.2.tar.gz',
     packages=setuptools.find_packages(),
     install_requires=['numpy','pandas','datetime','investpy','ta']
 )
