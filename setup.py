@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tatspy",
-    version="0.0.1",
+    version="0.0.2",
     author="Felipe Buchbinder",
     author_email="felbuch@gmail.com",
     description="Technical Analysis Time Series for Machine Learning",
