@@ -22,6 +22,12 @@ setuptools.setup(
     url="https://github.com/felbuch/tatspy",
     download_url='https://github.com/felbuch/tatspy/archive/v0.0.1.tar.gz',
     packages=setuptools.find_packages(),
+    install_requires=[
+        'numpy',
+        'pandas',
+        'datetime',
+        'investpy',
+        'ta'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
