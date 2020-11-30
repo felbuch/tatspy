@@ -11,7 +11,7 @@ It features not only american stocks, but also stocks from around the globe, fea
 
 ## For example...
 
-For example, you could use tatspy to get the daily values of the MACD, bollinger bands, parabolic SAR and ATR (among other) for Brazilian's oil giant Petrobras.
+For example, you could use tatspy to get the daily values of the MACD, bollinger bands, parabolic SAR and ATR (among other) for Brazil's Petrobras.
 
 ## Package contents
 
