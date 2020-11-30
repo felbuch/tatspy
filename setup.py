@@ -18,6 +18,7 @@ setuptools.setup(
     description="Technical Analysis Time Series for Machine Learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    keywords = ['STOCK', 'TECHNICAL ANALYSIS INDICATORS', 'HISTORICAL DATA' ,'TIME SERIES', 'MACHINE LEARNING', 'ALGORITHMIC TRADING'],   
     url="https://github.com/felbuch/tatspy",
     packages=setuptools.find_packages(),
     classifiers=[
