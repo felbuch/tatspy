@@ -43,6 +43,62 @@ At present, the following technical analysis indicators are made available by ta
 12. 'parabolic_SAR_indicator: Indicates if parabolic SAR suggests a price reversal upwards (+1) or downwards (-1)
 13. 'TRIX': Triple Exponential Average
 
+## Installing tatspy
+
+Just pip install it:
+
+```python
+!pip install tatspy
+```
+
+## Quick start
+
+Suppose you're interested in stocks from Brazil's retailer Magalu (ticker = mglu3), year-to-date.
+
+First, load the `stock` class:
+
+```python
+from tatspy.stock_class import stock
+```
+
+Now, create an instance of this class:
+
+```python
+>>> my_stock = stock('mglu', 'brazil')
+```
+
+To get historical prices and volume, run...
+
+```python
+>>> my_stock.get_stock_historical_prices()
+```
+
+This command will return a dataframe with OHLC prices and volume, which you can save as a variable.
+Alternatively, you can also access this dataframe using...
+
+```python
+>>> my_stock.historical_prices
+```
+
+To get technical analysis indicators for the same period, just run...
+
+```python
+>>> my_stock.get_technical_indicators()
+```
+This command will return a dataframe with technical indicators, which you can save as a variable.
+Alternatively, you can also access this dataframe using...
+
+```python
+>>> my_stock.technical_indicators
+```
+
+Now suppose you want to lag these indicators by 5 and 10 days. 
+You can simply run...
+
+```python
+>>> my_stock.lag_indicators(lags=[5,10])
+```
+
 ## Citations
 
 I am grateful for the authors of the following packages, which have been very helpful in building tatspy:
