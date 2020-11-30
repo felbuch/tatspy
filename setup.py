@@ -15,7 +15,7 @@ setuptools.setup(
     version="0.0.1",
     author="Felipe Buchbinder",
     author_email="felbuch@gmail.com",
-    description="Technical Analysis Time Series",
+    description="Technical Analysis Time Series for Machine Learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/felbuch/tatspy",
