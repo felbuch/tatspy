@@ -13,7 +13,7 @@ It features not only american stocks, but also stocks from around the globe, fea
 
 For example, you could use tatspy to get the daily values of the MACD, bollinger bands, parabolic SAR and ATR (among other) for Brazilian's oil giant Petrobras.
 
-## How?
+## Package contents
 
 The tatspy package defines a class called `stock`.
 It receives two attributes: the stock's `ticker` and its `country`
@@ -64,7 +64,7 @@ from tatspy.stock_class import stock
 Now, create an instance of this class:
 
 ```python
->>> my_stock = stock('mglu', 'brazil')
+>>> my_stock = stock('mglu3', 'brazil')
 ```
 
 To get historical prices and volume, run...
