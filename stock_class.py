@@ -580,7 +580,46 @@ class stock():
         #df = df.dropna()
         self.lagged_indicators = df
         return(self.lagged_indicators)
+    
+    def heikenashi(self):
         
+        '''Calculates the Heiken-Ashi candles time series
+        
+        Parameters:
+        -----------
+        None
+        
+        Returns:
+        --------
+        Pandas DataFrame
+        A dataframe with columns Open, High, Low and Close, containing Heiken-Ashi prices
+        time series
+        
+        '''
+        
+        import pandas as pd
+        
+        #Get data on historical prices
+        df = self.historical_prices
+        
+        #Select only info referring to prices
+        #i.e. drop volume
+        price_columns = ['Open','High','Low','Close']
+        df = df.loc[:, price_columns]
+        
+        #Create dataframe to store Heiken-Ashi prices
+        ha = pd.DataFrame(columns = price_columns) #ha, as in Heiken-Ashi
+        
+        #Calculate Heiken-Ashi prices and populate dataframe
+        ha['Low'] = df.apply(lambda x: min(x),axis = 1)
+        ha['High'] = df.apply(lambda x: max(x),axis = 1)
+        ha['Open'] = df.shift(1).apply(lambda x: (x[0] + x[3])/2, axis=1)
+        ha['Close'] = df.apply(lambda x: sum(x)/4, axis = 1)
+        
+        return(ha)
+       
+       
+       
     
 
     
