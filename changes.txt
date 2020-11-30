@@ -8,3 +8,8 @@ Created on Mon Nov 30 08:06:27 2020
 v.0.0.2
 Update package requirements
 Update README.md
+
+v.0.1.0
+Rewrite get_technical_indicators function to allow user to customize parameters.
+This function has been completely changed.
+Write auxiliary __calculate_indicator function.
