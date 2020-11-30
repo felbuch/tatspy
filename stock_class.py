@@ -135,45 +135,249 @@ class stock():
         self.historical_prices = hp
         
         return(hp)
+    
+    def __calculate_indicator(self, indicator, nf, include_flags):
         
+        '''An auxiliary function called by the get_technical_indicators method.
+        This function is not meant to be used by the user.
+        
+        Parameters:
+        -----------
+        * indicator: tuple
+            A tuple representing a request by the user to calculate a certain indicator.
+            It is an element of the indicators argument in the get_technical_indicators method.
+            For further explanation of this argument, please refer to that function's docstring.
+        
+        * nf: int or pandas Series
+            Normalizing factor.
+            1 if normalize=False in the get_technical_indicators method (default)
+            Otherwise, it is the inverse of the stock's closing price
+            Please refer to the get_technical_indicators method's docstring for details.
+        
+        * include_flags: bool
+            Whether to include flags for selected indicators.
+            Please refer to the get_technical_indicators method's docstring for details
+        
+        Returns:
+        --------
+        An updated version of the indicator attribute, containing the calculated indicator.
+        Note that this may mean multiple additional columns, depending on the indicator.
+        
+        '''
+        
+        import pandas as pd
+        import ta
+        
+        #Initialize dataframe
+        if isinstance(self.indicators, pd.DataFrame):
+            df = self.indicators
+        else:
+            df = self.historical_prices
+        
+        indicator_type, column_name, kwargs = indicator
+        if indicator_type == 'sma':
+                
+            ##########################
+            ## Simple Moving Average
+            ##########################
+            df[column_name] = ta.trend.sma_indicator(df.Close, **kwargs) * nf
+            
+        elif indicator_type == 'ema':
+               
+            ###############################
+            ## Exponential Moving Average
+            ###############################
+            df[column_name] = ta.trend.ema_indicator(df.Close, **kwargs) * nf
+                
+        elif indicator_type == 'rsi':
+            ##############################
+            ## Relative Strength Index
+            #############################
+            df[column_name] = ta.momentum.RSIIndicator(df.Close, **kwargs).rsi()
+                
+        elif indicator_type == 'bb':
+                
+            ##############################
+            ## Bollinger Bands
+            #############################
+                
+            #note: the bollinger band mean does not receive all parameters received by the bands
+            df[column_name + '_low'] = ta.volatility.bollinger_lband(df.Close, **kwargs) * nf
+            df[column_name + '_mean'] = ta.volatility.bollinger_mavg(df.Close, n = kwargs['n']) * nf 
+            df[column_name + '_high'] = ta.volatility.bollinger_hband(df.Close, **kwargs) * nf
+                
+            if include_flags:
+                    
+                # Add Bollinger Band low flag
+                df[column_name + '_low_flag'] = ta.volatility.bollinger_lband_indicator(df.Close, **kwargs)
+
+                # Add Bollinger Band high flag
+                df[column_name + '_high_flag'] = ta.volatility.bollinger_hband_indicator(df.Close, **kwargs)
+            
+        elif indicator_type == 'macd':
+                
+            #########################################
+            ## Moving Average Convergence-Divergence
+            #########################################
+                
+            #note: the macd line propper does not receive all parameters received by the signal and histogram  
+            df[column_name] = ta.trend.macd(df.Close, n_slow = kwargs['n_slow'], n_fast = kwargs['n_fast']) * nf
+            df[column_name + '_signal'] = ta.trend.macd_signal(df.Close, **kwargs) * nf
+            df[column_name + '_histogram'] = ta.trend.macd_diff(df.Close, **kwargs) * nf
+            
+        elif indicator_type == 'stoch':
+                
+            #########################################
+            ## Stochastic Oscillator
+            #########################################
+                
+            df[column_name] = ta.momentum.stoch(high = df.High, 
+                                                low=df.Low, 
+                                                close=df.Close,
+                                                **kwargs)
+            df[column_name + '_signal'] = ta.momentum.stoch_signal(high = df.High,
+                                                                    low=df.Low, 
+                                                                    close=df.Close,
+                                                                    **kwargs)
+        elif indicator_type == 'vwap':
+                
+            ##################################
+            ## Volume Weighted Average Price
+            ##################################
+                
+            df[column_name] = ta.volume.volume_weighted_average_price(high = df.High,
+                                                                      low = df.Low,
+                                                                      close = df.Close,
+                                                                      volume = df.Volume,
+                                                                      **kwargs) * nf
+        elif indicator_type == 'atr':
+                
+            ########################
+            ## Average True Range
+            ########################
+                
+            df[column_name] = ta.volatility.average_true_range(high = df.High,
+                                                               low = df.Low, 
+                                                                close = df.Close,
+                                                                **kwargs) * nf
+        elif indicator_type == 'adx':
+                
+            ##################################
+            ## Average Directional Index
+            ###################################
+                
+            df[column_name] = ta.trend.adx(high = df.High,
+                                           low = df.Low, 
+                                           close = df.Close,
+                                           **kwargs)
+            
+        elif indicator_type == 'psar':
+            
+            ##################
+            ## Parabolic SAR
+            ##################
+                
+            df[column_name + '_down'] = ta.trend.psar_down(high = df.High, 
+                                                           low = df.Low, 
+                                                           close = df.Close,
+                                                           **kwargs) * nf
+            
+            df[column_name + '_up'] = ta.trend.psar_up(high = df.High, 
+                                                       low = df.Low, 
+                                                       close = df.Close,
+                                                       **kwargs) * nf
+                
+            if include_flags:
+                    
+                #flags when trend reverses upwards
+                psar_up_indicator = ta.trend.psar_up_indicator(df.High, 
+                                                               df.Low, 
+                                                               df.Close,
+                                                               **kwargs)
+                #flags when trend reverses downwards
+                psar_down_indicator = ta.trend.psar_down_indicator(df.High,
+                                                                   df.Low, 
+                                                                   df.Close,
+                                                                   **kwargs)
+                    
+                #flags when trend reverses upwards (+1) or downwards (-1)
+                df[column_name + '_flag'] = psar_up_indicator - psar_down_indicator
+            
+        elif indicator_type == 'trix':
+                
+            #########################
+            ## Triple Exponential
+            ########################
+                
+            df[column_name] = ta.trend.trix(df.Close, **kwargs)
+        
+        #Update indicators table in self
+        self.indicators = df
+            
+        return(df)
+
+        
+        
+    
+            
     def get_technical_indicators(self,
-                                 indicators = ['simple_moving_average',
-                                               'exponential_moving_average',
-                                               'RSI',
-                                               'bollinger_bands',
-                                               'bollinger_bands_indicator',
-                                               'MACD',
-                                               'stochastic',
-                                               'VWAP',
-                                               'ATR',
-                                               'ADX',
-                                               'parabolic_SAR',
-                                               'parabolic_SAR_indicator'
-                                               'TRIX'],
+                                 indicators = [('sma', None, {'n':12}),
+                                               ('ema', None, {'n': 12}),
+                                               ('rsi', None, {'n':14}),
+                                               ('bb', None, {'n':20, 'ndev':2}),
+                                               ('macd',None,{'n_fast':12, 'n_slow':26, 'n_sign':9}),
+                                               ('stoch', None, {'n':14, 'd_n':3}),
+                                               ('vwap', None, {'n': 14}),
+                                               ('atr', None, {'n': 14}),
+                                               ('adx', None, {'n':14}),
+                                               ('psar', None, {'step': 0.02, 'max_step':0.2}),
+                                               ('trix', None, {'n': 15})],
+                                 include_flags = True,
                                  clean_dataframe = True,
                                  normalize=False):
+        
         
         '''Calculates time series of technical indicators
         
         Parameters:
         -----------
-        * indicators: list
-            List of strings referring to the names of the indicators to be calculated.
-            Possible values for these strings are the following:
+        * indicators: list of tuples
+            List of tuples referring to the indicators to be calculated.
+            Each tuple contains 3 elements:
+            - a short identifier of the type of indicator to be calculated (a string);
+            - the name of the column containing this indicator in the dataframe (a string)
+            - a dictionary containing the parameters used to calculate the indicator (a dictionary).
             
-            -'simple_moving_average' : simple moving average of stock price
-            -'exponential_moving_average': exponential moving average of stock price
-            -'RSI': Relative Strength Index
-            -'bollinger_bands': Bollinger Bands
-            -'bollinger_bands_indicator': Indicates if stock price close to bands, suggesting price reversal
-            -'MACD' : Moving Average Convergence-Divergence
-            -'stochastic': Stochastic Oscillator
-            -'VWAP': Volume Weighted Average Price
-            -'ATR': Average True Range
-            -'ADX': Average Directional Index
-            -'parabolic_SAR': Parabolic SAR
-            -'parabolic_SAR_indicator: Indicates if parabolic SAR suggests a price reversal upwards (+1) or downwards (-1)
-            -'TRIX': Triple Exponential Average
+            Thus, for instace, suppose we want to calculate a 5-days simple moving average and
+            call it sma5. The tuple would be:
+            ('sma', 'sma5', {'n': 5})
+            
+            If the column name is set to None (default), columns are named as the indicators they represent.
+            For example,
+            ('sma', None, {'n': 5})
+            produces a column named 'sma'.
+            
+            Possible values for the short identifier (1st position in the tuple) are:
+            
+            -'sma' : simple moving average of stock price
+            -'ema': exponential moving average of stock price
+            -'rsi': Relative Strength Index
+            -'bb': Bollinger Bands
+            -'macd' : Moving Average Convergence-Divergence
+            -'stoch': Stochastic Oscillator
+            -'vwap': Volume Weighted Average Price
+            -'atr': Average True Range
+            -'adx': Average Directional Index
+            -'psar': Parabolic SAR
+            -'trix': Triple Exponential Average
+            
+        *include_flags: bool
+            If True, includes a flags for bollinger bands and parabolic SAR.
+            In the case of bollinger bands, two flags are created, 
+            signaling whether stock price is close to the upper or lower bands.
+            In the case of parabolic SAR, a single flag is created.
+            This flag equals +1 if the trend reversed upwards, or -1 if the trend reversed downwards.
+            In both cases, a flag value of zero means no flag at all i.e. a mere continuation of the previous trend.
         * clean_dataframe: bool
             If True, removes missing data from first days, due to lag of indicators.
             See Notes for further explanation.
@@ -200,23 +404,23 @@ class stock():
         - 'bb_mean' : Average value of the band
         - 'bb_high' : Upper band value
         
-        Selecting 'bollinger_bands_indicator' as an indicator, creates 2 indicators:
+        Setting include_flags = True creates 2 additional indicators:
         
-        - bbi_high: 1 if stock price close to upper bollinger band, and 0 otherwise
-        - bbi_low: 1 if stock price close to lower bollinger band, and 0 otherwise
+        - bb_high_flag: 1 if stock price close to upper bollinger band, and 0 otherwise
+        - bb_low_flag: 1 if stock price close to lower bollinger band, and 0 otherwise
         
         Selecting 'MACD' as an indicator, creates 3 indicators:
         
-        - MACD: MACD line
-        - MACD_signal: MACD signal line
-        - MACD_histogram: the difference between MACD and its signal line
+        - 'macd': MACD line
+        - 'macd_signal': MACD signal line
+        - 'macd_histogram': the difference between MACD and its signal line
         
-        Selecting 'stochastic' as an indicator, creates 2 indicators:
+        Selecting 'stoch' (stochastic) as an indicator, creates 2 indicators:
         
-        - 'stochastic': the stochastic oscillator 
-        - 'stochastic_signal': the stochastic oscillator signal
+        - 'stoch': the stochastic oscillator 
+        - 'stoch_signal': the stochastic oscillator signal
 
-        Selecting 'parabolic_SAR' as an indicator, creates 2 indicators:
+        Selecting 'psar' (parabolic SAR) as an indicator, creates 2 indicators:
         
         - 'psar_up': the parabolic SAR values during an upward trend. 
         - 'psar_down': the parabolic SAR values during a downward trend. 
@@ -226,27 +430,31 @@ class stock():
         As a result, this indicator is not considered when dropping missing values
         (which happens when the clean_dataframe parameter is set to TRUE).
         
-        Selecting 'parabolic_SAR_indicator' creates an indicator which has value
+        Setting include_flags = True creates an indicator which has value
         1, if it indicates an upward trend, and -1, if it indicates a downward trend.
         A value of zero means no price reversal is being suggested.
 
         If normalize=TRUE, the values of the following indicators
         will be divided by the stock's closing price each day:
         
-        -'simple_moving_average' : simple moving average of stock price
-        -'exponential_moving_average': exponential moving average of stock price
-        -'bollinger_bands': Bollinger Bands
-        -'MACD' : Moving Average Convergence-Divergence line
-        -'VWAP': Volume Weighted Average Price
-        -'ATR': Average True Range
-        -'parabolic_SAR': Parabolic SAR
-        -'TRIX': Triple Exponential Average
+        -'sma' : simple moving average of stock price
+        -'ema': exponential moving average of stock price
+        -'bb': Bollinger Bands
+        -'macd' : Moving Average Convergence-Divergence line
+        -'vwap': Volume Weighted Average Price
+        -'atr': Average True Range
+        -'psar': Parabolic SAR
+        -'trix': Triple Exponential Average
 
         Examples:
         --------
         >>> s = stock('petr4','brazil')
         >>> s.get_stock_historical_prices('30/10/2020', '30/11/2020')
         >>> s.technical_indicators()
+        
+        Raises:
+        -------
+        Assertion Error if two columns have the same name
         
         References:
         -----------
@@ -259,8 +467,22 @@ class stock():
         
         import ta #technical analysis indicators
         
+        #Get historical prices
         df = self.historical_prices
         
+        #Get indicators names
+        indicators_names = list(map(lambda x: x[0], indicators))
+                    
+        #Set missing names of columns
+        #The column names appear on the second element of the indicator's tuple.
+        #If it is None, we set it equal to the indicator name
+        indicators = list(map(lambda x: 
+                              (x[0], x[0], x[2]) if x[1] == None
+                              else x, indicators))
+        
+        #assert column names are unique
+        assert len(set([i[1] for i in indicators])) == len(indicators), 'Two or more indicators have the same name. Please specify a unique name for each indicator'
+                
         #setup for normalization
         if normalize:
             #normalization factor
@@ -268,126 +490,9 @@ class stock():
         else:
             nf = 1
         
-        #Create technical analysis indicators
-        ######################################################
-        # Simple Moving Average
-        ######################################################
-        if 'simple_moving_average' in indicators:
-            df['simple_moving_average'] = ta.trend.sma_indicator(df.Close) * nf
-        
-        ######################################################
-        # Exponential Moving Average
-        ######################################################
-        if 'exponential_moving_average' in indicators:
-            df['exponential_moving_average'] = ta.trend.ema_indicator(df.Close) * nf
-
-        ######################################################
-        #RSI
-        ######################################################
-        if 'RSI' in indicators:
-            df['RSI'] = ta.momentum.RSIIndicator(df.Close).rsi()
-            
-        
-        ######################################################
-        #Bollinger Bands
-        ######################################################
-        if 'bollinger_bands' in indicators:
-            
-            df['bb_low'] = ta.volatility.bollinger_lband(df.Close) * nf
-            df['bb_mean'] = ta.volatility.bollinger_mavg(df.Close) * nf
-            df['bb_high'] = ta.volatility.bollinger_hband(df.Close) * nf
-            
-        if 'bollinger_bands_indicator' in indicators:
-            
-            # Add Bollinger Band high indicator
-            df['bbi_high'] = ta.volatility.bollinger_hband_indicator(df.Close)
-            
-            # Add Bollinger Band low indicator
-            df['bbi_low'] = ta.volatility.bollinger_lband_indicator(df.Close)
-            
-        ######################################################
-        # MACD
-        ###################################################### 
-        if 'MACD' in indicators:
-            
-            df['MACD'] = ta.trend.macd(df.Close) * nf
-            df['MACD_signal'] = ta.trend.macd_signal(df.Close) * nf
-            df['MACD_histogram'] = ta.trend.macd_diff(df.Close) * nf
-        
-        ######################################################
-        # Stochastic
-        ######################################################
-        if 'stochastic' in indicators:
-            
-            df['stochastic'] = ta.momentum.stoch(high = df.High, 
-                                                 low=df.Low, 
-                                                 close=df.Close)
-            df['stochastic_signal'] = ta.momentum.stoch_signal(high = df.High,
-                                                               low=df.Low, 
-                                                               close=df.Close)
-               
-        ######################################################
-        # VWAP
-        ######################################################
-        if 'VWAP' in indicators:
-            
-            df['VWAP'] = ta.volume.volume_weighted_average_price(high = df.High,
-                                                                 low = df.Low,
-                                                                 close = df.Close,
-                                                                 volume = df.Volume) * nf
-        
-        ######################################################
-        # ATR
-        ######################################################
-        if 'ATR' in indicators:
-            
-            df['ATR'] = ta.volatility.average_true_range(high = df.High,
-                                                         low = df.Low, 
-                                                         close = df.Close) * nf
-        
-        ######################################################
-        # ADX
-        ######################################################
-        if 'ADX' in indicators:
-
-            df['ADX'] = ta.trend.adx(high = df.High,
-                                     low = df.Low, 
-                                     close = df.Close)
-        
-        ######################################################
-        # Parabolic SAR
-        ######################################################
-        if 'parabolic_SAR' in indicators:
-
-            df['psar_down'] = ta.trend.psar_down(high = df.High, 
-                                                 low = df.Low, 
-                                                 close = df.Close) * nf
-            df['psar_up'] = ta.trend.psar_up(high = df.High, 
-                                             low = df.Low, 
-                                             close = df.Close) * nf
-        
-        ######################################################
-        # Parabolic SAR indicator
-        ######################################################
-        if 'parabolic_SAR_indicator' in indicators:
-            
-            psar_up_indicator = ta.trend.psar_down_indicator(df.High, 
-                                                             df.Low, 
-                                                             df.Close)
-
-            psar_down_indicator = ta.trend.psar_down_indicator(df.High, 
-                                                               df.Low, 
-                                                               df.Close)
-            
-            df['psar_indicator'] = psar_up_indicator - psar_down_indicator
-        
-        ######################################################
-        # TRIX
-        ######################################################
-        
-        if 'TRIX' in indicators:
-            
-            df['trix'] = ta.trend.trix(df.Close)
+        ## Calculate all indicators requested by user
+        for i in indicators:
+            df = self.__calculate_indicator(i, nf = nf, include_flags = include_flags)
         
         #drop price variables except price
         df = df.drop(columns=['Open',
