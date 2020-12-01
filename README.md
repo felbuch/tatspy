@@ -104,5 +104,5 @@ You can simply run...
 I am grateful for the authors of the following packages, which have been very helpful in building tatspy:
 
 * Alvaro Bartolome del Canto. (2018-2020). investpy - Financial Data Extraction from Investing.com with Python. https://github.com/alvarobartt/investpy.
-* Darío López Padial (aka Bukosabino). ta. https://github.com/bukosabino/ta.
+* Dario Lopez Padial (aka Bukosabino). ta. https://github.com/bukosabino/ta.
 
